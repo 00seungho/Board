@@ -1,10 +1,7 @@
 package com.example.board.entity;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -12,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@ToString
+@ToString(exclude = "board")
 public class Reply extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) //1씩 증가
@@ -21,4 +18,6 @@ public class Reply extends BaseEntity{
     private String text;
     private String replyer;
 
+    @ManyToOne
+    private Board board; // 일대 다 관계의 폴인키 설정(참조 무결성 유지)
 }

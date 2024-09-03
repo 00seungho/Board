@@ -17,6 +17,6 @@ public class Board extends BaseEntity{
     private String title;
     private String content;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member writer; // 일대 다 관계의 폴인키 설정(참조 무결성 유지)
 }

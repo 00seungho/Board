@@ -18,11 +18,11 @@ public class ReplyRepositoryTests {
     @Test
     public void inserReplys(){
         IntStream.rangeClosed(1,300).forEach(i -> {
-            long bno = (long) Math.random() * 100+1;
-
+            long bno = (long)(Math.random() * 100+1);
             Board board = Board.builder()
                     .bno(bno)
                     .build();
+
             Reply reply = Reply.builder()
                     .text("Reply"+i)
                     .board(board)

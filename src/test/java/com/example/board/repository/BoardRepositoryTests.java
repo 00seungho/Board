@@ -6,6 +6,11 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +22,8 @@ import java.util.stream.IntStream;
 public class BoardRepositoryTests {
     @Autowired
     private BoardRepository boardRepository;
+    @Autowired
+    private PageableHandlerMethodArgumentResolver pageableResolver;
 
     @Test
     public void inserBorads(){
@@ -60,5 +67,22 @@ public class BoardRepositoryTests {
         }
 //        Object[] arr = (
 //        System.out.println(Arrays.toString(arr));
+    }
+
+    @Test
+    public void testBoardWithReplyCount(){
+        Pageable pageable = PageRequest.of(0,10, Sort.by("bno").descending());
+        Page<Object[]> result = boardRepository.getBoardWithReplyCount(pageable);
+        result.get().forEach(row->{
+            Object[] arr = (Object[]) row;
+            System.out.println(Arrays.toString(arr));
+        });
+    }
+
+    @Test
+    public void testRead3(){
+        Object result = boardRepository.getBoardByBno(99L);
+        Object[] arr = (Object[]) result;
+        System.out.println(Arrays.toString(arr));
     }
 }

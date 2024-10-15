@@ -21,5 +21,4 @@ abstract class BaseEntity {
     @LastModifiedDate
     @Column(name = "modDate")
     private LocalDateTime modDate;
-
 }

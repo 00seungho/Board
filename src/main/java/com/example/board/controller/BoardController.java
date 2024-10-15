@@ -22,8 +22,8 @@ public class BoardController {
     @GetMapping("/list")
     public void list(PageRequestDTO pageRequestDTO, Model model){
         model.addAttribute("result", boardService.getList(pageRequestDTO));
-
     }
+
     @GetMapping("/register")
     public void register(){
 

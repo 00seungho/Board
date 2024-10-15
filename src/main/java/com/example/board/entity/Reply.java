@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@ToString(exclude = "templates/board")
+@ToString(exclude = "board")
 public class Reply extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) //1씩 증가

@@ -6,14 +6,20 @@ import com.example.board.entity.QMember;
 import com.example.board.entity.QReply;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Log4j2
 public class SearchBoardRepositoryImpl extends QuerydslRepositorySupport implements SearchBoardRepository {
@@ -35,7 +41,7 @@ public class SearchBoardRepositoryImpl extends QuerydslRepositorySupport impleme
         jpqlQuery.leftJoin(reply).on(reply.board.eq(board));
 
 //        JPQLQuery<Tuple> tuple = jpqlQuery.select(board, member.email, reply.count()).groupBy(board, member, reply);
-        JPQLQuery<Tuple> tuple = jpqlQuery.select(board, member.email, reply.count());
+        JPQLQuery<Tuple> tuple = jpqlQuery.select(board, member, reply.count());
         tuple.groupBy(board, member, reply);
 
 
@@ -61,12 +67,13 @@ public class SearchBoardRepositoryImpl extends QuerydslRepositorySupport impleme
 
         jpqlQuery.leftJoin(member).on(board.writer.eq(member));
         jpqlQuery.leftJoin(reply).on(reply.board.eq(board));
-        JPQLQuery<Tuple> tuple = jpqlQuery.select(board, member.email, reply.count());
-        tuple.groupBy(board, member, reply);
+        JPQLQuery<Tuple> tuple = jpqlQuery.select(board, member, reply.count());
+//        tuple.groupBy(board, member, reply);
 
 
         BooleanBuilder booleanBuilder = new BooleanBuilder();
         BooleanExpression booleanexpression = board.bno.gt(0L);
+        booleanBuilder.and(booleanexpression);
 
         if(type != null){
             String[] typeArr = type.split("");
@@ -90,12 +97,25 @@ public class SearchBoardRepositoryImpl extends QuerydslRepositorySupport impleme
         }//end if
 
         tuple.where(booleanBuilder);
+        Sort sort = pageable.getSort();
+        sort.stream().forEach(order -> {
+            Order direction = order.isAscending()? Order.ASC:Order.DESC;
+            String prop = order.getProperty();
+
+            PathBuilder orderByExpression = new PathBuilder(Board.class, "board");
+
+            tuple.orderBy(new OrderSpecifier<Comparable>(direction, orderByExpression.get(prop)));
+        });
         tuple.groupBy(board, member);
+
+        tuple.offset(pageable.getOffset());
+        tuple.limit(pageable.getPageSize());
         List <Tuple> result = tuple.fetch();
         log.info(result);
+        long count = tuple.fetchCount();
+        log.info("실행된 행의 개수: " + count);
 
-
-        return null;
+        return new PageImpl<Object[]>(result.stream().map(t->t.toArray()).collect(Collectors.toList()),pageable,count);
     };
 
 

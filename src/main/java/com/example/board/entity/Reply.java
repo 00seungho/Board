@@ -18,6 +18,6 @@ public class Reply extends BaseEntity{
     private String text;
     private String replyer;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Board board; // 일대 다 관계의 폴인키 설정(참조 무결성 유지)
 }

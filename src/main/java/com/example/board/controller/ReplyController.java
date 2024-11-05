@@ -21,5 +21,10 @@ public class ReplyController {
     public ResponseEntity<List<ReplyDTO>> getListByBoard(@PathVariable("bno") Long bno){
         return new ResponseEntity<>(replyService.getList(bno), HttpStatus.OK);
     }
+    @PostMapping("")
+    public ResponseEntity<Long> register(@RequestBody ReplyDTO replyDTO){
+        Long rno = replyService.register(replyDTO);
+        return new ResponseEntity<>(rno, HttpStatus.OK);
+    }
 
 }

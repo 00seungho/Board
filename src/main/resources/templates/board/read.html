@@ -37,6 +37,9 @@
                 <button type="button" class="btn btn-info form-group">List</button>
             </a>
             <div class="mt-4">
+                <span class="badge result-item addReply">
+                    Add Reply
+                    </span>
                 <h5>
                     <span class="badge result-item replyCount">
                         Reply Count[[${dto.replyCount}]]
@@ -49,17 +52,110 @@
         </th:block>
 
     </th:block>
+
+
+<!--start 모달-->
+<div class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>Modal Title</h5>
+                <button type="button" class="btn-close replyClose" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&nbsp;&nbsp;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" class="form-control" name="replyText" placeholder="Input Reply Text~">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" name="replyer" placeholder="Input replyer Text~">
+                </div>
+                <input type="hidden" name="rno">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger replyRemove">remove</button>
+                <button type="button" class="btn btn-info replyModify">modify</button>
+                <button type="button" class="btn btn-primary replySave">save</button>
+                <button type="button" class="btn btn-outline-secondary replyClose" data-dismiss="modal">close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
     <script th:inline="javascript">
         $(document ).ready(function (){
             var bno = [[${dto.bno}]];
-
             var listGroup = $(".replyList");
+            function formaTime(dateStr){
+                var dateObj = new Date(dateStr);
+                var result = dateObj.getFullYear() + '/'
+                result += (dateObj.getMonth() + 1) + '/'
+                result += dateObj.getDate()
+                result += dateObj.getHours() + ':'
+                result += dateObj.getMinutes();
+                return result
+            }
+            //특정 게시글의 댓글 처리함수
+            function loadJSONData(arr){
+                $.getJSON('/replies/board/' + bno)
+                    var htmlStr="";
+
+                $('.replyCount').html("Reply" + arr.length)
+                $.each(arr,function (idx, reply){
+                    htmlStr += '<div class="card-body" data-rno="'+ reply.rno+ '">' + reply.rno
+                    htmlStr += '<h5 class="card-title">'+reply.text+'</h5>'
+                    htmlStr += '<h6 class="card-subtitle">'+reply.replyer+'</h6>'
+                    htmlStr += '<p class="card-text">'+formaTime(reply.regDate)+'</p>'
+                    htmlStr += '</div>'
+                })
+                listGroup.html(htmlStr)
+            }
 
             $(".replyCount").click(function (){
                 $.getJSON("/replies/board/"+bno, function (jsonArr){
                     console.log(jsonArr)
+                    loadJSONData(jsonArr)
                 })
             });
+            //모달창
+             var modal = $(".modal");
+             $(".addReply").click(function (){
+                 modal.show()
+                 //입력된 값이 있으면 초기화 시키기 위함
+                 $('input[name="replyText"]').val('');
+                 $('input[name="replyer"]').val('');
+
+                 $(".modal-footer .btn").hide() // 모든 버튼을 숨기게
+                 $(".replySave, .replyClose").show() //save, close 만 보이게
+
+             })
+            $(".replyClose").click(function (){
+                modal.hide();
+            })
+
+            $(".replySave").click(function (){
+                var reply = {
+                    bno:bno,
+                    text:$('input[name="replyText"]').val(),
+                    replyer:$('input[name="replyer"]').val()
+                }
+                $.ajax({
+                    url:'/replies/',
+                    method:'post',
+                    data:JSON.stringify(reply),
+                    contentType:'application/json; charset=utf-8',
+                    dataType:"json",
+                    success: function (data){
+                        var newRno = parseInt(data);
+                        alert(newRno+"번 댓글이 정상 등록되었습니다.")
+                        modal.hide();
+                        loadJSONData();
+                    }
+                })
+            })
         })
     </script>
+
+
 </html>
